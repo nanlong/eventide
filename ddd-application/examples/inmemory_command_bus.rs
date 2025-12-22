@@ -15,7 +15,7 @@ struct CreateUser {
 struct CreateUserHandler;
 
 #[async_trait]
-impl CommandHandler<CreateUser> for CreateUserHandler {
+impl CommandHandler<CreateUser, ()> for CreateUserHandler {
     async fn handle(&self, _ctx: &AppContext, cmd: CreateUser) -> Result<(), AppError> {
         println!("CreateUser: name={}", cmd.name);
         Ok(())
@@ -30,7 +30,7 @@ struct DeleteUser {
 struct DeleteUserHandler;
 
 #[async_trait]
-impl CommandHandler<DeleteUser> for DeleteUserHandler {
+impl CommandHandler<DeleteUser, ()> for DeleteUserHandler {
     async fn handle(&self, _ctx: &AppContext, cmd: DeleteUser) -> Result<(), AppError> {
         println!("DeleteUser: id={}", cmd.id);
         Ok(())
@@ -40,8 +40,8 @@ impl CommandHandler<DeleteUser> for DeleteUserHandler {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let bus = InMemoryCommandBus::new();
-    bus.register::<CreateUser, _>(Arc::new(CreateUserHandler))?;
-    bus.register::<DeleteUser, _>(Arc::new(DeleteUserHandler))?;
+    bus.register::<CreateUser, (), _>(Arc::new(CreateUserHandler))?;
+    bus.register::<DeleteUser, (), _>(Arc::new(DeleteUserHandler))?;
 
     let ctx = AppContext {
         event_context: EventContext::builder()
@@ -69,7 +69,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         name: String,
     }
 
-    let result = bus
+    let result: Result<(), AppError> = bus
         .dispatch(
             &ctx,
             UpdateUser {

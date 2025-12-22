@@ -1,3 +1,4 @@
+pub mod bus_types;
 pub mod command_bus;
 pub mod command_handler;
 pub mod context;

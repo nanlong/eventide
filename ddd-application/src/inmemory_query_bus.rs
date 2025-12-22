@@ -1,27 +1,19 @@
-use crate::{
-    context::AppContext, error::AppError, query_bus::QueryBus, query_handler::QueryHandler,
-};
+use crate::bus_types::{BoxAnySend, HandlerFn};
+use crate::context::AppContext;
+use crate::error::AppError;
+use crate::query_bus::QueryBus;
+use crate::query_handler::QueryHandler;
 use async_trait::async_trait;
 use dashmap::DashMap;
-use std::any::{Any, TypeId, type_name, type_name_of_val};
-use std::future::Future;
-use std::pin::Pin;
+use std::any::{TypeId, type_name, type_name_of_val};
 use std::sync::Arc;
-
-type BoxAnySend = Box<dyn Any + Send>;
-
-type QueryHandlerFuture<'a> =
-    Pin<Box<dyn Future<Output = Result<BoxAnySend, AppError>> + Send + 'a>>;
-
-type QueryHandlerFn =
-    Arc<dyn for<'a> Fn(BoxAnySend, &'a AppContext) -> QueryHandlerFuture<'a> + Send + Sync>;
 
 /// 基于内存的 QueryBus 实现
 /// - 通过 TypeId 注册不同 Query 对应的 Handler
 /// - 以类型擦除方式调度，并在调用端进行结果还原
 pub struct InMemoryQueryBus {
     // 使用 (QueryTypeId, ResultTypeId) 作为键，避免相同 Query 不同返回类型的冲突
-    handlers: DashMap<(TypeId, TypeId), (&'static str, QueryHandlerFn)>,
+    handlers: DashMap<(TypeId, TypeId), (&'static str, HandlerFn)>,
 }
 
 impl Default for InMemoryQueryBus {
@@ -46,7 +38,7 @@ impl InMemoryQueryBus {
     {
         let key = (TypeId::of::<Q>(), TypeId::of::<R>());
 
-        let f: QueryHandlerFn = {
+        let f: HandlerFn = {
             let handler = handler.clone();
 
             Arc::new(move |boxed_q, ctx| {
@@ -180,7 +172,7 @@ mod tests {
     async fn type_mismatch_error_when_result_downcast_fails() {
         let bus = InMemoryQueryBus::new();
         // 手动插入一个错误的条目：键是 Get，但闭包返回 WrongDto 而非 NumDto
-        let f: QueryHandlerFn = Arc::new(|_boxed_q, _ctx| {
+        let f: HandlerFn = Arc::new(|_boxed_q, _ctx| {
             Box::pin(async move { Ok(Box::new(WrongDto) as BoxAnySend) })
         });
         bus.handlers.insert(

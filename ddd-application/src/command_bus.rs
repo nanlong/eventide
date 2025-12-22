@@ -12,18 +12,9 @@ pub trait CommandBus: Send + Sync {
     ///
     /// - `ctx`：应用上下文（链路追踪、幂等键等）
     /// - `cmd`：具体命令实例
-    async fn dispatch<C>(&self, ctx: &AppContext, cmd: C) -> Result<(), AppError>
-    where
-        C: Send + 'static;
-
-    /// 批量分发命令
-    async fn dispatch_batch<C>(&self, ctx: &AppContext, cmds: Vec<C>) -> Result<(), AppError>
+    /// - 返回：命令处理结果
+    async fn dispatch<C, R>(&self, ctx: &AppContext, cmd: C) -> Result<R, AppError>
     where
         C: Send + 'static,
-    {
-        for cmd in cmds {
-            self.dispatch(ctx, cmd).await?;
-        }
-        Ok(())
-    }
+        R: Send + 'static;
 }
