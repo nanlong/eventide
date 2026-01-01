@@ -25,4 +25,11 @@ pub trait EventReclaimer: Send + Sync {
         events: &[&SerializedEvent],
         reason: &str,
     ) -> Result<()>;
+
+    /// 指定处理器粒度的成功标记（若存在失败/过期记录则更新为成功）
+    async fn mark_handler_success(
+        &self,
+        handler_name: &str,
+        events: &[&SerializedEvent],
+    ) -> Result<()>;
 }

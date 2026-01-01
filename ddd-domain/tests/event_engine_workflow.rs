@@ -101,6 +101,13 @@ impl EventReclaimer for Reclaimer {
         }
         Ok(())
     }
+    async fn mark_handler_success(
+        &self,
+        _handler_name: &str,
+        _events: &[&SerializedEvent],
+    ) -> DomainResult<()> {
+        Ok(())
+    }
 }
 
 #[derive(Clone)]

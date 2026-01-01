@@ -107,6 +107,15 @@ impl EventReclaimer for InMemoryReclaimer {
         }
         Ok(())
     }
+
+    async fn mark_handler_success(
+        &self,
+        _handler_name: &str,
+        _events: &[&SerializedEvent],
+    ) -> DomainResult<()> {
+        // In-memory 简化：成功时无需记录
+        Ok(())
+    }
 }
 
 // ============================================================================

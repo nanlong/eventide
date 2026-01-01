@@ -237,10 +237,18 @@ impl EventEngine {
                                     let ev = event.clone();
                                     let reclaimer = reclaimer_for_stream.clone();
                                     async move {
-                                        if let Err(err) = h.handle(&ev).await {
-                                            let _ = reclaimer
-                                                .mark_handler_failed(h.handler_name(), &[&ev], &err.to_string())
-                                                .await;
+                                        match h.handle(&ev).await {
+                                            Ok(()) => {
+                                                // 标记处理成功（仅更新已存在的失败/过期记录）
+                                                let _ = reclaimer
+                                                    .mark_handler_success(h.handler_name(), &[&ev])
+                                                    .await;
+                                            }
+                                            Err(err) => {
+                                                let _ = reclaimer
+                                                    .mark_handler_failed(h.handler_name(), &[&ev], &err.to_string())
+                                                    .await;
+                                            }
                                         }
                                     }
                                 })
@@ -509,6 +517,13 @@ mod tests {
             for e in events {
                 self.stored.lock().unwrap().push((*e).clone());
             }
+            Ok(())
+        }
+        async fn mark_handler_success(
+            &self,
+            _handler_name: &str,
+            _events: &[&SerializedEvent],
+        ) -> DomainResult<()> {
             Ok(())
         }
     }
