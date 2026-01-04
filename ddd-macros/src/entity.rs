@@ -1,11 +1,14 @@
-use crate::utils::{apply_derives, ensure_required_fields};
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::punctuated::Punctuated;
-use syn::spanned::Spanned;
 use syn::{
-    Item, ItemStruct, Result, Token, Type, parse::Parse, parse::ParseStream, parse_macro_input,
+    Item, ItemStruct, Result, Token, Type,
+    parse::{Parse, ParseStream},
+    parse_macro_input,
+    punctuated::Punctuated,
+    spanned::Spanned,
 };
+
+use crate::utils::{apply_derives, ensure_required_fields};
 
 /// #[entity] 宏实现
 /// - 若缺失则追加字段：`id: IdType`, `version: Version`，并置于字段最前
@@ -44,7 +47,8 @@ pub(crate) fn expand(attr: TokenStream, item: TokenStream) -> TokenStream {
     ensure_required_fields(
         fields_named,
         &[("id", &id_type), ("version", &version_ty)],
-        /*reposition_existing*/ true,
+        // reposition_existing
+        true,
     );
 
     // 合并/规范 derive：默认添加 Debug（可通过 debug=false 关闭）、Default、Serialize、Deserialize

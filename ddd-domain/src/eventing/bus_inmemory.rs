@@ -7,14 +7,17 @@
 //!
 //! 注意：该实现具备“至少一次”投递语义，若无订阅者时发送将被忽略。
 
-use crate::error::{DomainError, DomainResult as Result};
-use crate::eventing::EventBus;
-use crate::persist::SerializedEvent;
 use async_trait::async_trait;
 use futures_core::stream::BoxStream;
 use futures_util::StreamExt;
 use tokio::sync::broadcast;
 use tokio_stream::wrappers::BroadcastStream;
+
+use crate::{
+    error::{DomainError, DomainResult as Result},
+    eventing::EventBus,
+    persist::SerializedEvent,
+};
 
 /// 简单的内存事件总线实现
 #[derive(Clone)]

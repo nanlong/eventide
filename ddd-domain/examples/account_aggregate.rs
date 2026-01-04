@@ -1,19 +1,22 @@
+use std::{
+    collections::HashMap,
+    sync::{Arc, Mutex},
+};
+
 /// Account 聚合示例
 /// 演示基于命令驱动的事件溯源：打开账户、存取款等
 use async_trait::async_trait;
-use ddd_domain::aggregate::Aggregate;
-use ddd_domain::aggregate_root::AggregateRoot;
-use ddd_domain::domain_event::{EventContext, EventEnvelope};
-use ddd_domain::entity::Entity;
-use ddd_domain::error::{DomainError, DomainResult};
-use ddd_domain::persist::{
-    AggregateRepository, EventRepository, SerializedEvent, serialize_events,
+use ddd_domain::{
+    aggregate::Aggregate,
+    aggregate_root::AggregateRoot,
+    domain_event::{EventContext, EventEnvelope},
+    entity::Entity,
+    error::{DomainError, DomainResult},
+    persist::{AggregateRepository, EventRepository, SerializedEvent, serialize_events},
+    value_object::Version,
 };
-use ddd_domain::value_object::Version;
 use ddd_macros::{domain_event, entity, entity_id};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
 use ulid::Ulid;
 
 // ============================================================================

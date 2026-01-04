@@ -2,9 +2,9 @@
 //!
 //! 负责拉取失败/超时/漏投递事件进行补偿，并细化到处理器粒度的失败标记，
 //! 以便区分具体 handler 的异常。
-//!
-use crate::{error::DomainResult as Result, persist::SerializedEvent};
 use async_trait::async_trait;
+
+use crate::{error::DomainResult as Result, persist::SerializedEvent};
 
 /// 事件回收器：拉取失败/超时/漏投递事件进行补偿
 #[async_trait]

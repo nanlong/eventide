@@ -1,7 +1,6 @@
 //! 实体（Entity）基础抽象
 //!
 //! 为聚合与实体提供统一的标识（Id）与版本（optimistic locking）能力。
-//!
 use std::{fmt::Display, str::FromStr};
 
 use crate::value_object::Version;

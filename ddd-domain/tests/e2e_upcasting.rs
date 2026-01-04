@@ -1,20 +1,23 @@
 #![cfg(feature = "eventing")]
+use std::{
+    collections::HashMap,
+    sync::{Arc, Mutex},
+};
+
 use anyhow::Result as AnyResult;
 use async_trait::async_trait;
 use chrono::Utc;
-use ddd_domain::aggregate::Aggregate;
-use ddd_domain::domain_event::EventContext;
-use ddd_domain::entity::Entity;
-use ddd_domain::error::{DomainError, DomainResult};
-use ddd_domain::event_upcaster::{EventUpcaster, EventUpcasterChain, EventUpcasterResult};
-use ddd_domain::persist::{
-    AggregateRepository, EventRepository, EventSourcedRepo, SerializedEvent,
+use ddd_domain::{
+    aggregate::Aggregate,
+    domain_event::EventContext,
+    entity::Entity,
+    error::{DomainError, DomainResult},
+    event_upcaster::{EventUpcaster, EventUpcasterChain, EventUpcasterResult},
+    persist::{AggregateRepository, EventRepository, EventSourcedRepo, SerializedEvent},
+    value_object::Version,
 };
-use ddd_domain::value_object::Version;
 use ddd_macros::{domain_event, entity};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
 
 #[entity]
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

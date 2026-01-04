@@ -3,8 +3,8 @@ use ddd_domain::{domain_event::EventContext, persist::SerializedEvent};
 /// 应用层上下文（Application Context）
 ///
 /// 承载一次应用层调用（命令/查询）所需的横切信息，例如：
-/// - 业务语境（`EventContext`）：关联追踪 `correlation_id`、因果链 `causation_id`、
-///   执行者类型/ID 等；
+/// - 业务语境（`EventContext`）：关联追踪 `correlation_id`、因果链 `causation_id`、 执行者类型/ID
+///   等；
 /// - 幂等键（`idempotency_key`）：用于在基础设施层实现请求幂等（如 API 层重复提交保护）。
 ///
 /// 典型用法：

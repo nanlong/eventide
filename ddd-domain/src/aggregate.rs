@@ -4,11 +4,11 @@
 //! - `execute` 将命令转换为事件（不改变状态）；
 //! - `apply` 将事件投影到状态（改变状态）；
 //! - 通过 `Entity` 约束聚合具备标识与版本。
-//!
-use crate::domain_event::DomainEvent;
-use crate::entity::Entity;
-use serde::{Serialize, de::DeserializeOwned};
 use std::error::Error;
+
+use serde::{Serialize, de::DeserializeOwned};
+
+use crate::{domain_event::DomainEvent, entity::Entity};
 
 /// 聚合根接口
 pub trait Aggregate: Entity + Default + Serialize + DeserializeOwned + Send + Sync {
@@ -30,14 +30,16 @@ pub trait Aggregate: Entity + Default + Serialize + DeserializeOwned + Send + Sy
 
 #[cfg(test)]
 mod tests {
-    use super::Aggregate;
-    use crate::domain_event::EventEnvelope;
-    use crate::domain_event::{DomainEvent, EventContext};
-    use crate::entity::Entity;
-    use crate::error::DomainError;
-    use crate::value_object::Version;
     use ddd_macros::{domain_event, entity};
     use serde::{Deserialize, Serialize};
+
+    use super::Aggregate;
+    use crate::{
+        domain_event::{DomainEvent, EventContext, EventEnvelope},
+        entity::Entity,
+        error::DomainError,
+        value_object::Version,
+    };
 
     #[entity]
     #[derive(Debug, Clone, Default, Serialize, Deserialize)]

@@ -8,7 +8,6 @@
 //! - `EventEngine`：编排投递、订阅与调度处理，并发执行、失败标记与补偿。
 //!
 //! 该模块仅定义协议与引擎，不绑定具体传输实现，可对接任意消息系统或内存实现。
-//!
 pub mod bus;
 pub mod bus_inmemory;
 pub mod deliverer;

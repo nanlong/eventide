@@ -1,6 +1,6 @@
-use serde::Serialize;
-use serde::de::DeserializeOwned;
 use std::fmt;
+
+use serde::{Serialize, de::DeserializeOwned};
 
 use crate::value_object::Version;
 

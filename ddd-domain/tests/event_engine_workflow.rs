@@ -1,19 +1,26 @@
 #![cfg(feature = "eventing")]
+use std::{
+    collections::HashSet,
+    sync::{
+        Arc, Mutex,
+        atomic::{AtomicUsize, Ordering},
+    },
+    time::Duration,
+};
+
 use anyhow::Result as AnyResult;
 use chrono::Utc;
-use ddd_domain::domain_event::EventContext;
-use ddd_domain::error::{DomainError, DomainResult};
-use ddd_domain::eventing::{
-    EventBus, EventDeliverer, EventEngine, EventEngineConfig, EventHandler, EventReclaimer,
-    HandledEventType,
+use ddd_domain::{
+    domain_event::EventContext,
+    error::{DomainError, DomainResult},
+    eventing::{
+        EventBus, EventDeliverer, EventEngine, EventEngineConfig, EventHandler, EventReclaimer,
+        HandledEventType,
+    },
+    persist::SerializedEvent,
 };
-use ddd_domain::persist::SerializedEvent;
 use futures_core::stream::BoxStream;
 use futures_util::StreamExt;
-use std::collections::HashSet;
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex};
-use std::time::Duration;
 use tokio::sync::broadcast;
 use tokio_stream::wrappers::BroadcastStream;
 
@@ -206,7 +213,8 @@ async fn event_engine_full_workflow() -> AnyResult<()> {
     handle.shutdown();
     handle.join().await;
 
-    // 两个 outbox 事件均已 delivered；Bad 在第一次失败后进入 reclaimer，经 reclaim 再次投递后被 handler 成功处理并标记 reclaimed
+    // 两个 outbox 事件均已 delivered；Bad 在第一次失败后进入 reclaimer，经 reclaim 再次投递后被
+    // handler 成功处理并标记 reclaimed
     assert!(deliverer.delivered.load(Ordering::Relaxed) >= 2);
     assert!(reclaimer.reclaimed.load(Ordering::Relaxed) >= 1);
     Ok(())

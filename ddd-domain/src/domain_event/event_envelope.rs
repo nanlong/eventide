@@ -1,8 +1,7 @@
-use crate::aggregate::Aggregate;
 use chrono::Utc;
 
-use super::event_context::EventContext;
-use super::metadata::Metadata;
+use super::{event_context::EventContext, metadata::Metadata};
+use crate::aggregate::Aggregate;
 
 /// 事件信封，包含事件载荷、元数据与业务上下文
 #[derive(Debug, Clone)]

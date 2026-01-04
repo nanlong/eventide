@@ -62,8 +62,8 @@ pub(crate) fn apply_derives(attrs: &mut Vec<Attribute>, required: Vec<syn::Path>
 
 /// 确保具名字段结构体/变体包含所需字段
 /// - required: (字段名, 字段类型) 列表，按给定顺序处理
-/// - reposition_existing: 若为 true，则即使已存在也会把所需字段移至最前（entity 需要）；
-///   若为 false，则仅在缺失时追加，保留既有顺序（event 需要）。
+/// - reposition_existing: 若为 true，则即使已存在也会把所需字段移至最前（entity 需要）； 若为
+///   false，则仅在缺失时追加，保留既有顺序（event 需要）。
 pub(crate) fn ensure_required_fields(
     fields_named: &mut FieldsNamed,
     required: &[(&str, &Type)],

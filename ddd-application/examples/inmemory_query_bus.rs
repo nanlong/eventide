@@ -1,12 +1,12 @@
+use std::sync::Arc;
+
 use async_trait::async_trait;
-use ddd_application::InMemoryQueryBus;
-use ddd_application::context::AppContext;
-use ddd_application::error::AppError;
-use ddd_application::query_bus::QueryBus;
-use ddd_application::query_handler::QueryHandler;
+use ddd_application::{
+    InMemoryQueryBus, context::AppContext, error::AppError, query_bus::QueryBus,
+    query_handler::QueryHandler,
+};
 use ddd_domain::domain_event::EventContext;
 use serde::Serialize;
-use std::sync::Arc;
 
 #[derive(Debug)]
 struct GetUser {

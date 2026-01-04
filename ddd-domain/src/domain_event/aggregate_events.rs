@@ -1,11 +1,9 @@
-use chrono::{DateTime, Utc};
-use std::ops::Deref;
-use std::slice::Iter;
-use std::vec::IntoIter;
+use std::{ops::Deref, slice::Iter, vec::IntoIter};
 
-use crate::aggregate::Aggregate;
+use chrono::{DateTime, Utc};
 
 use super::event_envelope::EventEnvelope;
+use crate::aggregate::Aggregate;
 
 /// 聚合事件集合，按时间顺序排列，便于获取创建/修改者与时间等信息
 pub struct AggregateEvents<A>

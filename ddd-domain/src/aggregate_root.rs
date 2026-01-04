@@ -2,14 +2,14 @@
 //!
 //! 封装从“加载聚合 → 执行命令 → 应用事件 → 持久化事件”的标准流程，
 //! 以仓储实现（`AggregateRepository`）为依赖，便于在应用层直接调用。
-//!
+use std::marker::PhantomData;
+
 use crate::{
     aggregate::Aggregate,
     domain_event::{EventContext, EventEnvelope},
     persist::AggregateRepository,
     value_object::Version,
 };
-use std::marker::PhantomData;
 
 /// 面向应用层的聚合根编排器。
 ///

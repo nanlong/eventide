@@ -1,7 +1,6 @@
 //! 值对象（Value Object）
 //!
 //! 无标识、以值相等为准的对象，用于封装不可变的概念性值与校验逻辑。
-//!
 
 use std::fmt;
 
@@ -35,8 +34,8 @@ pub trait ValueObject {
 ///
 /// assert!(v2 > v1);
 /// ```
-// 使用 value_object 宏提供基础的派生（Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq）
-// 手动添加 Version 特有的派生（Copy, PartialOrd, Ord, Hash）
+// 使用 value_object 宏提供基础的派生（Debug, Clone, Default, Serialize, Deserialize, PartialEq,
+// Eq） 手动添加 Version 特有的派生（Copy, PartialOrd, Ord, Hash）
 #[value_object]
 #[derive(Copy, PartialOrd, Ord, Hash)]
 pub struct Version(usize);

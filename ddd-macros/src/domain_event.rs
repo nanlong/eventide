@@ -1,12 +1,16 @@
-use crate::utils::{apply_derives, ensure_required_fields};
+use std::collections::HashMap;
+
 use proc_macro::TokenStream;
 use quote::{ToTokens, quote};
-use std::collections::HashMap;
-use syn::punctuated::Punctuated;
-use syn::spanned::Spanned;
 use syn::{
-    Expr, Ident, Item, Result, Token, Type, parse::Parse, parse::ParseStream, parse_macro_input,
+    Expr, Ident, Item, Result, Token, Type,
+    parse::{Parse, ParseStream},
+    parse_macro_input,
+    punctuated::Punctuated,
+    spanned::Spanned,
 };
+
+use crate::utils::{apply_derives, ensure_required_fields};
 
 /// #[domain_event] 宏实现
 /// - 支持三种变体类型：命名字段 `Variant { .. }`、单元 `Variant`、元组 `Variant(T)`
@@ -85,7 +89,13 @@ pub(crate) fn expand(attr: TokenStream, item: TokenStream) -> TokenStream {
                     }
                 }
             } else if attr.path().is_ident("event_type") || attr.path().is_ident("event_version") {
-                return syn::Error::new(attr.span(), "legacy #[event_type]/#[event_version] syntax is no longer supported; use #[event(event_type = ..., event_version = ...)]").to_compile_error().into();
+                return syn::Error::new(
+                    attr.span(),
+                    "legacy #[event_type]/#[event_version] syntax is no longer supported; use \
+                     #[event(event_type = ..., event_version = ...)]",
+                )
+                .to_compile_error()
+                .into();
             } else {
                 retained_attrs.push(attr.clone());
             }
@@ -106,7 +116,8 @@ pub(crate) fn expand(attr: TokenStream, item: TokenStream) -> TokenStream {
                 ensure_required_fields(
                     fields_named,
                     &[("id", &id_type), ("aggregate_version", &version_ty)],
-                    /*reposition_existing*/ false,
+                    // reposition_existing
+                    false,
                 );
             }
             syn::Fields::Unit => {
@@ -114,7 +125,8 @@ pub(crate) fn expand(attr: TokenStream, item: TokenStream) -> TokenStream {
                 v.fields = syn::Fields::Named(create_required_fields_only(&id_type));
             }
             syn::Fields::Unnamed(fields_unnamed) => {
-                // 元组变体转换为命名字段变体: Variant(T) => Variant { value: T, id, aggregate_version }
+                // 元组变体转换为命名字段变体: Variant(T) => Variant { value: T, id,
+                // aggregate_version }
                 v.fields = syn::Fields::Named(convert_tuple_to_named(fields_unnamed, &id_type));
             }
         }

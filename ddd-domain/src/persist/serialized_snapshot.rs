@@ -1,14 +1,14 @@
 //! 快照持久化模型（SerializedSnapshot）
 //!
 //! 定义聚合快照在持久化层的标准形态与与聚合实例之间的转换。
-//!
+use bon::Builder;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+
 use crate::{
     aggregate::Aggregate,
     error::{DomainError, DomainResult as Result},
 };
-use bon::Builder;
-use serde::{Deserialize, Serialize};
-use serde_json::Value;
 
 #[derive(Debug, Clone, Builder, Serialize, Deserialize)]
 pub struct SerializedSnapshot {

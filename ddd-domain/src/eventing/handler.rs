@@ -1,9 +1,9 @@
 //! 事件处理器（EventHandler）
 //!
 //! 定义消费某类/多类/全部事件的处理逻辑与元信息（名称、订阅类型）。
-//!
-use crate::persist::SerializedEvent;
 use async_trait::async_trait;
+
+use crate::persist::SerializedEvent;
 
 #[derive(Clone, Debug)]
 pub enum HandledEventType {

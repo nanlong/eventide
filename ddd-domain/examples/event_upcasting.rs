@@ -1,3 +1,8 @@
+use std::{
+    collections::HashMap,
+    sync::{Arc, Mutex},
+};
+
 /// Event Upcasting 示例
 /// 演示如何使用 EventUpcaster 和 EventUpcasterChain 处理事件版本升级
 ///
@@ -16,20 +21,20 @@
 /// - v4: account.withdrew { minor_units: i64, currency: String } - 重命名为 withdrew
 use anyhow::Result as AnyResult;
 use async_trait::async_trait;
-use ddd_domain::aggregate::Aggregate;
-use ddd_domain::domain_event::{EventContext, EventEnvelope};
-use ddd_domain::entity::Entity;
-use ddd_domain::error::{DomainError, DomainResult};
-use ddd_domain::event_upcaster::{EventUpcaster, EventUpcasterChain, EventUpcasterResult};
-use ddd_domain::persist::{
-    AggregateRepository, EventRepository, EventSourcedRepo, SerializedEvent, SerializedSnapshot,
-    SnapshotPolicy, SnapshotPolicyRepo, SnapshotRepository, SnapshotRepositoryWithPolicy,
-    serialize_events,
+use ddd_domain::{
+    aggregate::Aggregate,
+    domain_event::{EventContext, EventEnvelope},
+    entity::Entity,
+    error::{DomainError, DomainResult},
+    event_upcaster::{EventUpcaster, EventUpcasterChain, EventUpcasterResult},
+    persist::{
+        AggregateRepository, EventRepository, EventSourcedRepo, SerializedEvent,
+        SerializedSnapshot, SnapshotPolicy, SnapshotPolicyRepo, SnapshotRepository,
+        SnapshotRepositoryWithPolicy, serialize_events,
+    },
 };
 use ddd_macros::{domain_event, entity};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
 use ulid::Ulid;
 
 // ============================================================================
@@ -879,7 +884,8 @@ async fn main() -> AnyResult<()> {
 
     let incremental_events = vec![
         create_withdraw(&account_id, 2, Some(10), None, Some("CNY")), // v2: 追加取款 10 元
-        create_deposit(&account_id, 3, None, Some(1500), Some("CNY")), // v3: 追加存款 15 元 (1500分)
+        create_deposit(&account_id, 3, None, Some(1500), Some("CNY")), /* v3: 追加存款 15 元
+                                                                       * (1500分) */
     ];
     println!(
         "  ➕ 追加 {} 个增量事件（快照之后）",

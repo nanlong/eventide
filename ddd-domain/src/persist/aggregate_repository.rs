@@ -2,18 +2,21 @@
 //!
 //! 基于事件溯源（Event Store）与快照（Snapshot）的通用聚合仓储实现，
 //! 通过事件上抬链在重建过程中完成旧事件兼容。
-//!
-use crate::error::DomainError;
-use crate::persist::SnapshotRepositoryWithPolicy;
+use std::sync::Arc;
+
+use async_trait::async_trait;
+
 use crate::{
     aggregate::Aggregate,
     domain_event::{EventContext, EventEnvelope},
+    error::DomainError,
     event_upcaster::EventUpcasterChain,
-    persist::{EventRepository, SnapshotRepository, deserialize_events, serialize_events},
+    persist::{
+        EventRepository, SnapshotRepository, SnapshotRepositoryWithPolicy, deserialize_events,
+        serialize_events,
+    },
     value_object::Version,
 };
-use async_trait::async_trait;
-use std::sync::Arc;
 
 #[async_trait]
 pub trait AggregateRepository<A>: Send + Sync

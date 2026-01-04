@@ -3,9 +3,9 @@
 //! 当事件载荷结构演进时，通过上抬器（`EventUpcaster`）在读取路径对旧事件进行
 //! 逐步转换（拆分/合并/重命名/丢弃等），`EventUpcasterChain` 负责串联多步转换
 //! 并在稳定后返回。
-//!
-use crate::{error::DomainResult as Result, persist::SerializedEvent};
 use std::sync::Arc;
+
+use crate::{error::DomainResult as Result, persist::SerializedEvent};
 
 /// 事件版本升级器（Upcaster）
 pub trait EventUpcaster: Send + Sync {
@@ -130,12 +130,16 @@ impl Extend<Arc<dyn EventUpcaster>> for EventUpcasterChain {
 
 #[cfg(test)]
 mod tests {
-    use super::{EventUpcaster, EventUpcasterChain, EventUpcasterResult};
-    use crate::domain_event::EventContext;
-    use crate::error::{DomainError, DomainResult};
-    use crate::persist::SerializedEvent;
-    use chrono::Utc;
     use std::sync::Arc;
+
+    use chrono::Utc;
+
+    use super::{EventUpcaster, EventUpcasterChain, EventUpcasterResult};
+    use crate::{
+        domain_event::EventContext,
+        error::{DomainError, DomainResult},
+        persist::SerializedEvent,
+    };
 
     fn mk_event(ty: &str, ver: usize, payload: serde_json::Value) -> SerializedEvent {
         let id = ulid::Ulid::new().to_string();

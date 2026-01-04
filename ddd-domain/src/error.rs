@@ -73,7 +73,7 @@
 //! ### 2. 自定义业务错误
 //!
 //! ```rust
-//! use ddd_domain::error::{ErrorCode, ErrorKind, DomainError};
+//! use ddd_domain::error::{DomainError, ErrorCode, ErrorKind};
 //! use thiserror::Error;
 //!
 //! #[derive(Debug, Error)]
@@ -155,8 +155,7 @@
 //! 4. **中间层价值**：[`DomainError`] 提供开箱即用的领域错误，减少样板代码
 //! 5. **类型安全**：通过 `downcast_ref` 可在需要时取回原始错误类型
 
-use std::error::Error as StdError;
-use std::fmt;
+use std::{error::Error as StdError, fmt};
 
 // ==================== 错误分类 ====================
 
@@ -360,14 +359,13 @@ pub trait ErrorCode: StdError + Send + Sync + 'static {
 /// let err = DomainError::new(ErrorKind::InvalidCommand, "库存不足");
 ///
 /// // 自定义错误码
-/// let err = DomainError::new(ErrorKind::NotFound, "用户不存在")
-///     .with_code("USER_NOT_FOUND");
+/// let err = DomainError::new(ErrorKind::NotFound, "用户不存在").with_code("USER_NOT_FOUND");
 /// ```
 ///
 /// ## 包装自定义错误
 ///
 /// ```rust
-/// use ddd_domain::error::{DomainError, ErrorKind, ErrorCode};
+/// use ddd_domain::error::{DomainError, ErrorCode, ErrorKind};
 /// use thiserror::Error;
 ///
 /// #[derive(Debug, Error)]
@@ -442,8 +440,9 @@ impl DomainError {
     /// # 示例
     ///
     /// ```rust
-    /// use ddd_domain::error::{DomainError, ErrorKind};
     /// use std::io;
+    ///
+    /// use ddd_domain::error::{DomainError, ErrorKind};
     ///
     /// let io_err = io::Error::new(io::ErrorKind::NotFound, "文件不存在");
     /// let err = DomainError::custom(ErrorKind::Internal, io_err);
@@ -469,10 +468,9 @@ impl DomainError {
     /// # 示例
     ///
     /// ```rust
-    /// use ddd_domain::error::{DomainError, ErrorKind, ErrorCode};
+    /// use ddd_domain::error::{DomainError, ErrorCode, ErrorKind};
     ///
-    /// let err = DomainError::not_found("用户 123")
-    ///     .with_code("USER_NOT_FOUND");
+    /// let err = DomainError::not_found("用户 123").with_code("USER_NOT_FOUND");
     ///
     /// assert_eq!(err.code(), "USER_NOT_FOUND");
     /// ```
@@ -489,7 +487,7 @@ impl DomainError {
     /// # 示例
     ///
     /// ```rust
-    /// use ddd_domain::error::{DomainError, ErrorKind, ErrorCode};
+    /// use ddd_domain::error::{DomainError, ErrorCode, ErrorKind};
     ///
     /// let err = DomainError::invalid_value("金额必须为正数");
     /// assert_eq!(err.kind(), ErrorKind::InvalidValue);
@@ -505,7 +503,7 @@ impl DomainError {
     /// # 示例
     ///
     /// ```rust
-    /// use ddd_domain::error::{DomainError, ErrorKind, ErrorCode};
+    /// use ddd_domain::error::{DomainError, ErrorCode, ErrorKind};
     ///
     /// let err = DomainError::invalid_state("订单已关闭");
     /// assert_eq!(err.kind(), ErrorKind::InvalidState);
@@ -521,7 +519,7 @@ impl DomainError {
     /// # 示例
     ///
     /// ```rust
-    /// use ddd_domain::error::{DomainError, ErrorKind, ErrorCode};
+    /// use ddd_domain::error::{DomainError, ErrorCode, ErrorKind};
     ///
     /// let err = DomainError::invalid_command("库存不足");
     /// assert_eq!(err.kind(), ErrorKind::InvalidCommand);
@@ -537,7 +535,7 @@ impl DomainError {
     /// # 示例
     ///
     /// ```rust
-    /// use ddd_domain::error::{DomainError, ErrorKind, ErrorCode};
+    /// use ddd_domain::error::{DomainError, ErrorCode, ErrorKind};
     ///
     /// let err = DomainError::not_found("用户 123");
     /// assert_eq!(err.kind(), ErrorKind::NotFound);
@@ -573,7 +571,7 @@ impl DomainError {
     /// # 示例
     ///
     /// ```rust
-    /// use ddd_domain::error::{DomainError, ErrorKind, ErrorCode};
+    /// use ddd_domain::error::{DomainError, ErrorCode, ErrorKind};
     ///
     /// let err = DomainError::internal("数据库连接失败");
     /// assert_eq!(err.kind(), ErrorKind::Internal);
@@ -596,7 +594,8 @@ impl DomainError {
         let reason = reason.into();
         let msg = match stage {
             Some(s) => format!(
-                "upcast failed: type={event_type}, from_version={from_version}, stage={s}, reason={reason}"
+                "upcast failed: type={event_type}, from_version={from_version}, stage={s}, \
+                 reason={reason}"
             ),
             None => format!(
                 "upcast failed: type={event_type}, from_version={from_version}, reason={reason}"

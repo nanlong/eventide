@@ -1,17 +1,20 @@
+use std::{
+    sync::{Arc, Mutex},
+    time::Duration,
+};
+
 /// Eventing 引擎（内存版）示例
 /// 展示 Outbox -> Bus -> Handlers -> Reclaimer 的闭环，以及 handler 失败后的补偿重投
 use anyhow::Result as AnyResult;
 use chrono::Utc;
-use ddd_domain::domain_event::EventContext;
-use ddd_domain::error::DomainResult;
-use ddd_domain::eventing::{
-    EventDeliverer, EventEngine, EventEngineConfig, EventHandler, EventReclaimer, HandledEventType,
-    InMemoryEventBus,
-};
-use ddd_domain::persist::SerializedEvent;
-use std::{
-    sync::{Arc, Mutex},
-    time::Duration,
+use ddd_domain::{
+    domain_event::EventContext,
+    error::DomainResult,
+    eventing::{
+        EventDeliverer, EventEngine, EventEngineConfig, EventHandler, EventReclaimer,
+        HandledEventType, InMemoryEventBus,
+    },
+    persist::SerializedEvent,
 };
 
 // ============================================================================

@@ -15,7 +15,6 @@
 //! 2. 选择 `persist` 中的仓储接口并提供具体实现；
 //! 3. 使用 `eventing` 构建事件引擎，连接总线与投递/回收组件；
 //! 4. 通过 `AggregateRoot` 编排一条完整的命令到事件持久化的流程。
-//!
 pub mod aggregate;
 pub mod aggregate_root;
 pub mod domain_event;

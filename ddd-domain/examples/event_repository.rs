@@ -1,21 +1,26 @@
+use std::{
+    collections::HashMap,
+    sync::{Arc, Mutex},
+};
+
 /// EventRepository 示例
 /// 演示如何实现事件仓储接口，用于持久化和查询领域事件
 use anyhow::Result as AnyResult;
 use async_trait::async_trait;
-use ddd_domain::aggregate::Aggregate;
-use ddd_domain::aggregate_root::AggregateRoot;
-use ddd_domain::domain_event::{EventContext, EventEnvelope};
-use ddd_domain::entity::Entity;
-use ddd_domain::error::{DomainError, DomainResult};
-use ddd_domain::event_upcaster::EventUpcasterChain;
-use ddd_domain::persist::{
-    AggregateRepository, EventRepository, SerializedEvent, deserialize_events, serialize_events,
+use ddd_domain::{
+    aggregate::Aggregate,
+    aggregate_root::AggregateRoot,
+    domain_event::{EventContext, EventEnvelope},
+    entity::Entity,
+    error::{DomainError, DomainResult},
+    event_upcaster::EventUpcasterChain,
+    persist::{
+        AggregateRepository, EventRepository, SerializedEvent, deserialize_events, serialize_events,
+    },
+    value_object::Version,
 };
-use ddd_domain::value_object::Version;
 use ddd_macros::{domain_event, entity};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
 use ulid::Ulid;
 
 // ============================================================================

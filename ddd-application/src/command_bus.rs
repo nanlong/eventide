@@ -1,5 +1,6 @@
-use crate::{context::AppContext, error::AppError};
 use async_trait::async_trait;
+
+use crate::{context::AppContext, error::AppError};
 
 /// 命令总线（Command Bus）
 ///

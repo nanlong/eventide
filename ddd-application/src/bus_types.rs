@@ -1,11 +1,8 @@
 //! 命令总线和查询总线的公共类型定义
 
-use crate::context::AppContext;
-use crate::error::AppError;
-use std::any::Any;
-use std::future::Future;
-use std::pin::Pin;
-use std::sync::Arc;
+use std::{any::Any, future::Future, pin::Pin, sync::Arc};
+
+use crate::{context::AppContext, error::AppError};
 
 /// 类型擦除的 Send 类型
 pub type BoxAnySend = Box<dyn Any + Send>;

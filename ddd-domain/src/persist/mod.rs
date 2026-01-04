@@ -7,7 +7,6 @@
 //! - 纯事件或事件+快照的聚合仓储实现（`EventSourcedRepo`、`SnapshotPolicyRepo`）。
 //!
 //! 该模块聚焦协议与装配逻辑，具体存储后端（如 Postgres）由上层提供实现并注入。
-//!
 mod aggregate_repository;
 mod event_repository;
 mod serialized_event;

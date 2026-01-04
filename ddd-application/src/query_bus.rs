@@ -1,5 +1,6 @@
-use crate::{context::AppContext, error::AppError};
 use async_trait::async_trait;
+
+use crate::{context::AppContext, error::AppError};
 
 /// 查询总线（Query Bus）
 ///

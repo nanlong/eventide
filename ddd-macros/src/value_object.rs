@@ -1,9 +1,14 @@
-use crate::utils::apply_derives;
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::punctuated::Punctuated;
-use syn::spanned::Spanned;
-use syn::{Item, Result, Token, parse::Parse, parse::ParseStream, parse_macro_input};
+use syn::{
+    Item, Result, Token,
+    parse::{Parse, ParseStream},
+    parse_macro_input,
+    punctuated::Punctuated,
+    spanned::Spanned,
+};
+
+use crate::utils::apply_derives;
 
 /// #[value_object] 宏实现
 /// - 支持结构体（具名或 tuple）与枚举

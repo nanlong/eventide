@@ -2,17 +2,17 @@
 //!
 //! 定义事件在持久化层的标准形态与在 `EventEnvelope` 间的转换，
 //! 并提供批量序列化/反序列化与上抬组合的工具函数。
-//!
+use bon::Builder;
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+
 use crate::{
     aggregate::Aggregate,
     domain_event::{DomainEvent, EventContext, EventEnvelope, Metadata},
     error::{DomainError, DomainResult},
     event_upcaster::EventUpcasterChain,
 };
-use bon::Builder;
-use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
-use serde_json::Value;
 
 #[derive(Debug, Clone, Builder, Serialize, Deserialize)]
 pub struct SerializedEvent {

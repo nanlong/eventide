@@ -1,12 +1,18 @@
-use crate::bus_types::{BoxAnySend, HandlerFn};
-use crate::command_bus::CommandBus;
-use crate::command_handler::CommandHandler;
-use crate::context::AppContext;
-use crate::error::AppError;
+use std::{
+    any::{TypeId, type_name, type_name_of_val},
+    sync::Arc,
+};
+
 use async_trait::async_trait;
 use dashmap::DashMap;
-use std::any::{TypeId, type_name, type_name_of_val};
-use std::sync::Arc;
+
+use crate::{
+    bus_types::{BoxAnySend, HandlerFn},
+    command_bus::CommandBus,
+    command_handler::CommandHandler,
+    context::AppContext,
+    error::AppError,
+};
 
 /// 基于内存的 CommandBus 实现
 /// - 通过 (CommandTypeId, ResultTypeId) 注册不同 Command 对应的 Handler
@@ -115,12 +121,13 @@ impl InMemoryCommandBus {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::command_handler::CommandHandler;
-    use crate::error::AppError;
-    use ddd_domain::error::ErrorCode;
     use std::sync::atomic::{AtomicUsize, Ordering};
+
+    use ddd_domain::error::ErrorCode;
     use tokio::task::JoinSet;
+
+    use super::*;
+    use crate::{command_handler::CommandHandler, error::AppError};
 
     #[derive(Debug)]
     struct Add;

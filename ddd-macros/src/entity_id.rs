@@ -1,8 +1,13 @@
-use crate::utils::apply_derives;
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::spanned::Spanned;
-use syn::{Item, Result, Token, parse::Parse, parse::ParseStream, parse_macro_input};
+use syn::{
+    Item, Result, Token,
+    parse::{Parse, ParseStream},
+    parse_macro_input,
+    spanned::Spanned,
+};
+
+use crate::utils::apply_derives;
 
 /// #[entity_id] 宏实现
 /// 仅支持单字段 tuple struct，并为包装类型：

@@ -1,11 +1,11 @@
-use async_trait::async_trait;
-use ddd_application::InMemoryCommandBus;
-use ddd_application::command_bus::CommandBus;
-use ddd_application::command_handler::CommandHandler;
-use ddd_application::context::AppContext;
-use ddd_application::error::AppError;
-use ddd_domain::domain_event::EventContext;
 use std::sync::Arc;
+
+use async_trait::async_trait;
+use ddd_application::{
+    InMemoryCommandBus, command_bus::CommandBus, command_handler::CommandHandler,
+    context::AppContext, error::AppError,
+};
+use ddd_domain::domain_event::EventContext;
 
 #[derive(Debug)]
 struct CreateUser {

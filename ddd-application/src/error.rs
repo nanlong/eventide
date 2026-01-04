@@ -34,8 +34,7 @@
 //!
 //! fn process_command() -> AppResult<String> {
 //!     // 领域错误会自动转换为 AppError
-//!     let domain_result: Result<String, DomainError> =
-//!         Err(DomainError::not_found("user 123"));
+//!     let domain_result: Result<String, DomainError> = Err(DomainError::not_found("user 123"));
 //!     domain_result?;
 //!
 //!     Ok("success".to_string())
@@ -81,9 +80,9 @@
 //! }
 //! ```
 
+use std::{error::Error as StdError, fmt};
+
 use ddd_domain::error::{DomainError, ErrorCode, ErrorKind};
-use std::error::Error as StdError;
-use std::fmt;
 
 /// 应用层统一错误类型
 ///
@@ -314,9 +313,10 @@ impl AppError {
     /// # 示例
     ///
     /// ```rust
+    /// use std::io;
+    ///
     /// use ddd_application::error::AppError;
     /// use ddd_domain::error::ErrorKind;
-    /// use std::io;
     ///
     /// let io_err = io::Error::new(io::ErrorKind::NotFound, "file not found");
     /// let err = AppError::wrap(ErrorKind::Internal, "IO_ERROR", io_err);

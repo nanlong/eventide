@@ -1,12 +1,18 @@
-use crate::bus_types::{BoxAnySend, HandlerFn};
-use crate::context::AppContext;
-use crate::error::AppError;
-use crate::query_bus::QueryBus;
-use crate::query_handler::QueryHandler;
+use std::{
+    any::{TypeId, type_name, type_name_of_val},
+    sync::Arc,
+};
+
 use async_trait::async_trait;
 use dashmap::DashMap;
-use std::any::{TypeId, type_name, type_name_of_val};
-use std::sync::Arc;
+
+use crate::{
+    bus_types::{BoxAnySend, HandlerFn},
+    context::AppContext,
+    error::AppError,
+    query_bus::QueryBus,
+    query_handler::QueryHandler,
+};
 
 /// 基于内存的 QueryBus 实现
 /// - 通过 TypeId 注册不同 Query 对应的 Handler
@@ -116,13 +122,14 @@ impl InMemoryQueryBus {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::error::AppError;
-    use crate::query_handler::QueryHandler;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
     use ddd_domain::error::ErrorCode;
     use serde::Serialize;
-    use std::sync::atomic::{AtomicUsize, Ordering};
     use tokio::task::JoinSet;
+
+    use super::*;
+    use crate::{error::AppError, query_handler::QueryHandler};
 
     #[derive(Debug)]
     struct Get;

@@ -1,10 +1,11 @@
 //! 快照仓储协议与策略
 //!
 //! 定义聚合快照读写接口与简单的落盘策略（按版本间隔）。
-//!
-use crate::{aggregate::Aggregate, error::DomainResult as Result, persist::SerializedSnapshot};
-use async_trait::async_trait;
 use std::sync::Arc;
+
+use async_trait::async_trait;
+
+use crate::{aggregate::Aggregate, error::DomainResult as Result, persist::SerializedSnapshot};
 
 #[async_trait]
 pub trait SnapshotRepository: Send + Sync {

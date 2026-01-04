@@ -5,20 +5,21 @@
 //! - 订阅总线事件流，按处理器匹配分发并发执行；
 //! - 失败标记与补偿重放；
 //! - 提供关闭与等待的 `EngineHandle`。
-//!
-use super::handler::HandledEventType;
-use super::{EventBus, EventDeliverer, EventHandler, EventReclaimer};
-use crate::persist::SerializedEvent;
+use std::{collections::HashMap, sync::Arc, time::Duration};
+
 use async_trait::async_trait;
 use bon::Builder;
 use futures_util::{StreamExt, stream};
-use std::{collections::HashMap, sync::Arc, time::Duration};
-use tokio::task::JoinHandle;
-use tokio::time::{self, MissedTickBehavior};
+use tokio::{
+    task::JoinHandle,
+    time::{self, MissedTickBehavior},
+};
 use tokio_util::sync::CancellationToken;
 
 // 导入由 bon::Builder 生成的 typestate 模块与状态转换别名
 use self::event_engine_builder::{IsUnset, SetRegistry, State as BuilderState};
+use super::{EventBus, EventDeliverer, EventHandler, EventReclaimer, handler::HandledEventType};
+use crate::persist::SerializedEvent;
 
 /// EventEngine：
 /// - 周期性从 Deliverer/Reclaimer 拉取事件并发布到 Bus
@@ -267,8 +268,8 @@ impl EventEngine {
     }
 }
 
-// 自定义 Builder 方法：接收 handlers，内部转换为 HandlerRegistry 并设置到 builder 的 registry 字段。
-// 注意：受 typestate 限制，仅当 `registry` 尚未设置时可调用。
+// 自定义 Builder 方法：接收 handlers，内部转换为 HandlerRegistry 并设置到 builder 的 registry
+// 字段。 注意：受 typestate 限制，仅当 `registry` 尚未设置时可调用。
 // 若已设置 `registry`，编译器会报错提示重复设置。
 // 正确的做法是：链式调用一次 `event_handlers(...)` 即可。
 
@@ -409,17 +410,23 @@ impl Drop for EngineHandle {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::domain_event::EventContext;
-    use crate::error::{DomainError, DomainResult};
+    use std::sync::{
+        Arc, Mutex,
+        atomic::{AtomicUsize, Ordering},
+    };
+
     use async_trait::async_trait;
     use chrono::Utc;
     use futures_core::stream::BoxStream;
     use futures_util::StreamExt;
-    use std::sync::atomic::{AtomicUsize, Ordering};
-    use std::sync::{Arc, Mutex};
     use tokio::sync::broadcast;
     use tokio_stream::wrappers::BroadcastStream;
+
+    use super::*;
+    use crate::{
+        domain_event::EventContext,
+        error::{DomainError, DomainResult},
+    };
 
     #[derive(Clone)]
     struct InMemoryBus {
