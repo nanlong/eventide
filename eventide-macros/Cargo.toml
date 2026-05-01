@@ -22,7 +22,11 @@ quote = { workspace = true }
 syn = { workspace = true }
 
 [dev-dependencies]
-eventide-domain = { workspace = true }
+# Path-only (no version) so cargo strips this from the published manifest.
+# Otherwise `cargo publish -p eventide-macros` would refuse, because
+# eventide-domain isn't on crates.io yet (chicken-and-egg: domain depends
+# on macros, so macros must publish first).
+eventide-domain = { path = "../eventide-domain" }
 serde = { workspace = true }
 trybuild = { workspace = true }
 uuid = { workspace = true }
