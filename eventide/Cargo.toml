@@ -1,0 +1,39 @@
+[package]
+name = "eventide"
+description = "A pragmatic Rust toolkit for Domain-Driven Design with event sourcing and CQRS. Umbrella crate re-exporting `eventide-domain`, `eventide-application` and `eventide-macros`."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/eventide"
+readme = "README.md"
+keywords.workspace = true
+categories.workspace = true
+
+[features]
+# By default mirror `eventide-domain`'s defaults: ship the eventing subsystem
+# and procedural macros so `use eventide::prelude::*;` works out of the box.
+default = ["eventing", "macros", "application"]
+# Re-export the asynchronous event subsystem (`eventide_domain::eventing`).
+eventing = ["eventide-domain/eventing"]
+# Pull in `eventide-macros` and re-export it as `eventide::macros`.
+macros = ["dep:eventide-macros"]
+# Pull in `eventide-application` and re-export it as `eventide::application`.
+application = ["dep:eventide-application"]
+# Expose `infra-sqlx` for downstream infrastructure crates that persist
+# serialized events / snapshots into a Postgres-backed event store.
+infra-sqlx = ["eventide-domain/infra-sqlx"]
+
+[dependencies]
+# Inlined (not using workspace = true) so we can set `default-features = false`
+# and let this crate's own `eventing` feature gate the asynchronous subsystem.
+eventide-domain = { path = "../eventide-domain", version = "0.1.0", default-features = false }
+eventide-application = { workspace = true, optional = true }
+eventide-macros = { workspace = true, optional = true }
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

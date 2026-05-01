@@ -1,0 +1,84 @@
+[package]
+name = "eventide-domain"
+description = "Domain layer for the eventide DDD/CQRS toolkit: aggregates, entities, value objects, domain events, repositories, and an in-memory event engine."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/eventide-domain"
+readme = "README.md"
+keywords.workspace = true
+categories.workspace = true
+
+[features]
+# `eventing` is enabled by default to preserve the most common DDD experience
+# (aggregates that publish events through an asynchronous engine). Pure modeling
+# users can opt out via `default-features = false`.
+default = ["eventing"]
+# Asynchronous event subsystem: bus, engine, dispatcher and reclaimer.
+# Brings in tokio + futures because those primitives are runtime-bound.
+eventing = [
+    "dep:tokio",
+    "dep:tokio-util",
+    "dep:tokio-stream",
+    "dep:futures-core",
+    "dep:futures-util",
+]
+# Optional `sqlx` conversions for serialized events / snapshots so infrastructure
+# crates can persist them into a Postgres-backed event store without forcing the
+# domain layer to depend on a database driver.
+infra-sqlx = ["dep:sqlx"]
+
+[dependencies]
+anyhow = { workspace = true }
+async-trait = { workspace = true }
+bon = { workspace = true }
+chrono = { workspace = true }
+eventide-macros = { workspace = true }
+futures-core = { workspace = true, optional = true }
+futures-util = { workspace = true, optional = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+sqlx = { workspace = true, optional = true }
+thiserror = { workspace = true }
+tokio = { workspace = true, optional = true }
+tokio-stream = { workspace = true, optional = true }
+tokio-util = { workspace = true, optional = true }
+uuid = { workspace = true }
+
+[dev-dependencies]
+anyhow = { workspace = true }
+tokio = { workspace = true }
+ulid = { workspace = true }
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[[example]]
+name = "event_upcasting"
+path = "examples/event_upcasting.rs"
+required-features = ["eventing"]
+
+[[example]]
+name = "account_aggregate"
+path = "examples/account_aggregate.rs"
+required-features = ["eventing"]
+
+[[example]]
+name = "event_repository"
+path = "examples/event_repository.rs"
+required-features = ["eventing"]
+
+[[example]]
+name = "snapshot_repository"
+path = "examples/snapshot_repository.rs"
+required-features = ["eventing"]
+
+[[example]]
+name = "eventing_inmemory"
+path = "examples/eventing_inmemory.rs"
+required-features = ["eventing"]

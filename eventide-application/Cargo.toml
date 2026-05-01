@@ -1,0 +1,28 @@
+[package]
+name = "eventide-application"
+description = "Application layer for the eventide DDD/CQRS toolkit: command bus, query bus, handlers, application context, and an in-memory bus implementation."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/eventide-application"
+readme = "README.md"
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+async-trait = { workspace = true }
+dashmap = { workspace = true }
+eventide-domain = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+serde = { workspace = true }
+tokio = { workspace = true }
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
