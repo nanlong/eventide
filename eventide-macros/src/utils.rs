@@ -1,5 +1,76 @@
-use quote::ToTokens;
+use proc_macro_crate::{FoundCrate, crate_name};
+use proc_macro2::{Span, TokenStream};
+use quote::{ToTokens, quote};
 use syn::{Attribute, Field, FieldsNamed, Token, Type, punctuated::Punctuated};
+
+/// Resolve a path that points at the `eventide-domain` crate, regardless of
+/// whether the downstream user depends on it directly, on the `eventide`
+/// umbrella crate (which re-exports it as `eventide::domain`), or under a
+/// renamed `[dependencies]` entry.
+///
+/// Resolution order:
+/// 1. `eventide` (umbrella) → `::<rename>::domain`.
+/// 2. `eventide-domain` → `::<rename>`.
+/// 3. Neither found → assume `::eventide_domain` so the error message points
+///    at a concrete missing dependency rather than a panic from this helper.
+///
+/// `FoundCrate::Itself` is treated the same as `Name`: the source crate is
+/// expected to make its own name resolvable via `extern crate self as
+/// <name>;` (both `eventide-domain` and `eventide` do this). That keeps the
+/// generated code identical for in-crate examples / integration tests / unit
+/// tests, where `crate::` would point at the wrong target binary.
+pub(crate) fn eventide_domain_path() -> TokenStream {
+    if let Ok(found) = crate_name("eventide") {
+        let name = match found {
+            FoundCrate::Itself => "eventide".to_string(),
+            FoundCrate::Name(name) => name,
+        };
+        let id = syn::Ident::new(&name, Span::call_site());
+        return quote!(::#id::domain);
+    }
+    if let Ok(found) = crate_name("eventide-domain") {
+        let name = match found {
+            FoundCrate::Itself => "eventide_domain".to_string(),
+            FoundCrate::Name(name) => name,
+        };
+        let id = syn::Ident::new(&name, Span::call_site());
+        return quote!(::#id);
+    }
+    quote!(::eventide_domain)
+}
+
+/// Path to the `serde` re-export inside `eventide-domain`. Generated derives
+/// use this so users do not need a direct `serde` dependency.
+pub(crate) fn serde_path() -> TokenStream {
+    let domain = eventide_domain_path();
+    quote!(#domain::__serde)
+}
+
+/// Build the `#[serde(crate = "...")]` attribute that tells `serde_derive`
+/// where to find the `serde` runtime — required when the derive path goes
+/// through a re-export rather than `::serde` directly.
+pub(crate) fn serde_crate_attr() -> Attribute {
+    let path = serde_crate_string();
+    syn::parse_quote!(#[serde(crate = #path)])
+}
+
+fn serde_crate_string() -> String {
+    if let Ok(found) = crate_name("eventide") {
+        let name = match found {
+            FoundCrate::Itself => "eventide".to_string(),
+            FoundCrate::Name(name) => name,
+        };
+        return format!("::{}::domain::__serde", name);
+    }
+    if let Ok(found) = crate_name("eventide-domain") {
+        let name = match found {
+            FoundCrate::Itself => "eventide_domain".to_string(),
+            FoundCrate::Name(name) => name,
+        };
+        return format!("::{}::__serde", name);
+    }
+    "::eventide_domain::__serde".to_string()
+}
 
 // Split a list of attributes into two pieces: the non-`derive`
 // attributes (which we want to keep verbatim) and the flat list of
@@ -68,11 +139,19 @@ pub(crate) fn derive_key(p: &syn::Path) -> String {
 // Convenience wrapper that applies the merge in place: it splits the
 // existing attribute list, merges the derives, and then replaces
 // `*attrs` with a single normalised `#[derive(...)]` attribute followed
-// by the original non-derive attributes.
-pub(crate) fn apply_derives(attrs: &mut Vec<Attribute>, required: Vec<syn::Path>) {
+// by the caller-supplied helper attributes (e.g. `#[serde(crate = "...")]`)
+// and finally the original non-derive attributes the user wrote.
+pub(crate) fn apply_derives(
+    attrs: &mut Vec<Attribute>,
+    required: Vec<syn::Path>,
+    helper_attrs: Vec<Attribute>,
+) {
     let (retained, existing) = split_derives(attrs);
     let merged = merge_derives(existing, required);
-    *attrs = std::iter::once(merged).chain(retained).collect();
+    *attrs = std::iter::once(merged)
+        .chain(helper_attrs)
+        .chain(retained)
+        .collect();
 }
 
 /// Ensure a named-field struct or enum variant contains the requested

@@ -1,4 +1,6 @@
-use crate::utils::{apply_derives, ensure_required_fields};
+use crate::utils::{
+    apply_derives, ensure_required_fields, eventide_domain_path, serde_crate_attr, serde_path,
+};
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::punctuated::Punctuated;
@@ -47,13 +49,15 @@ pub(crate) fn expand(attr: TokenStream, item: TokenStream) -> TokenStream {
     };
 
     let id_type = cfg.id_ty.unwrap_or_else(|| syn::parse_quote! { String });
+    let domain = eventide_domain_path();
+    let serde = serde_path();
 
     // Reorganise the fields so that `id` and `version` are guaranteed to
     // exist and appear at the very top of the struct (in that order). The
     // `true` flag asks `ensure_required_fields` to *reposition* any
     // existing `id`/`version` fields rather than just appending missing
     // ones, which keeps the field layout uniform across all entities.
-    let version_ty: Type = syn::parse_quote! { ::eventide_domain::value_object::Version };
+    let version_ty: Type = syn::parse_quote! { #domain::value_object::Version };
 
     ensure_required_fields(
         fields_named,
@@ -68,15 +72,15 @@ pub(crate) fn expand(attr: TokenStream, item: TokenStream) -> TokenStream {
     // redacting `Debug` impl.
     let mut required: Vec<syn::Path> = vec![
         syn::parse_quote!(Default),
-        syn::parse_quote!(serde::Serialize),
-        syn::parse_quote!(serde::Deserialize),
+        syn::parse_quote!(#serde::Serialize),
+        syn::parse_quote!(#serde::Deserialize),
     ];
 
     if cfg.derive_debug.unwrap_or(true) {
         required.insert(0, syn::parse_quote!(Debug));
     }
 
-    apply_derives(&mut st.attrs, required);
+    apply_derives(&mut st.attrs, required, vec![serde_crate_attr()]);
 
     let out_struct = ItemStruct { ..st };
 
@@ -91,16 +95,16 @@ pub(crate) fn expand(attr: TokenStream, item: TokenStream) -> TokenStream {
     let expanded = quote! {
         #out_struct
 
-        impl #impl_generics ::eventide_domain::entity::Entity for #ident #ty_generics #where_clause {
+        impl #impl_generics #domain::entity::Entity for #ident #ty_generics #where_clause {
             type Id = #id_type;
 
-            fn new(aggregate_id: Self::Id, version: ::eventide_domain::value_object::Version) -> Self {
+            fn new(aggregate_id: Self::Id, version: #domain::value_object::Version) -> Self {
                 Self { id: aggregate_id, version, ..Default::default() }
             }
 
             fn id(&self) -> &Self::Id { &self.id }
 
-            fn version(&self) -> ::eventide_domain::value_object::Version { self.version }
+            fn version(&self) -> #domain::value_object::Version { self.version }
         }
     };
 

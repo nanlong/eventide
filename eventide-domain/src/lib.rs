@@ -47,3 +47,38 @@ pub mod value_object;
 // `::eventide_domain::...` paths — keep resolving correctly when used in the
 // crate's own unit tests.
 extern crate self as eventide_domain;
+
+// Re-export `serde` so `eventide-macros` can route generated `Serialize` /
+// `Deserialize` derive paths through this crate. Lets downstream users
+// depend only on `eventide` (or `eventide-domain`) without also pulling
+// `serde` into their own `Cargo.toml`.
+#[doc(hidden)]
+pub use serde as __serde;
+
+// Re-export `async_trait` so users can write `#[async_trait]` on their own
+// trait impls (e.g. `DomainService`, `EventHandler`) without adding a
+// direct `async-trait` dependency. Two re-exports are needed because the
+// crate (module namespace) and the attribute macro (macro namespace) live
+// in separate Rust namespaces:
+//
+// * `pub use ::async_trait;` — exposes the crate as `eventide_domain::async_trait`,
+//   so paths like `eventide_domain::async_trait::Boxed` keep working.
+// * `pub use ::async_trait::async_trait;` — exposes the attribute macro under
+//   the same path, so `use eventide_domain::async_trait;` followed by
+//   `#[async_trait]` resolves correctly. The leading `::` anchors the
+//   lookup at the crate root rather than re-entering the module re-export
+//   on the previous line, which would otherwise create a resolution loop.
+pub use ::async_trait;
+pub use ::async_trait::async_trait;
+
+/// Re-export of the `tokio` runtime, available when the `eventing` feature
+/// is enabled.
+///
+/// Lets downstream users write `#[tokio::main]` / `tokio::spawn` / etc.
+/// through `eventide_domain::tokio` (or `eventide::tokio`) without adding a
+/// direct `tokio` dependency. Gated on `eventing` because that is the only
+/// feature that already pulls `tokio` into the build graph; pure modelling
+/// users who opt out of `eventing` keep a runtime-free dependency tree.
+#[cfg(feature = "eventing")]
+#[cfg_attr(docsrs, doc(cfg(feature = "eventing")))]
+pub use tokio;

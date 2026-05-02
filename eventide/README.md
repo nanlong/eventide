@@ -26,10 +26,25 @@ Add the crate to your `Cargo.toml`:
 ```toml
 [dependencies]
 eventide = "0.1"
-serde = { version = "1", features = ["derive"] }
-tokio = { version = "1", features = ["full"] }
-async-trait = "0.1"
 ```
+
+> One dependency is enough for the common path. The umbrella crate
+> re-exports every runtime symbol you need on top of `eventide`:
+>
+> - `serde` — generated `Serialize` / `Deserialize` derives route through
+>   `eventide`'s internal re-export, so `#[entity]`, `#[entity_id]`,
+>   `#[domain_event]` and `#[value_object]` work without a direct `serde`
+>   dependency.
+> - `eventide::tokio` — the Tokio runtime (e.g. `#[eventide::tokio::main]`,
+>   `eventide::tokio::spawn`). Available with the `eventing` feature
+>   (default).
+> - `eventide::async_trait` — write `#[async_trait]` on your own
+>   trait impls (`DomainService`, `EventHandler`, etc.) without depending
+>   on `async-trait` directly.
+>
+> Add `serde`, `tokio` or `async-trait` to your own `Cargo.toml` only when
+> you reach for them outside the re-exports (extra derives, custom
+> `#[serde(...)]` attributes, advanced runtime features).
 
 Define an aggregate:
 

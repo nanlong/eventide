@@ -8,7 +8,7 @@ use syn::{
     spanned::Spanned,
 };
 
-use crate::utils::apply_derives;
+use crate::utils::{apply_derives, serde_crate_attr, serde_path};
 
 /// #[value_object] 宏实现
 /// - 支持结构体（具名或 tuple）与枚举
@@ -20,11 +20,13 @@ pub(crate) fn expand(attr: TokenStream, item: TokenStream) -> TokenStream {
     let cfg = parse_macro_input!(attr as ValueObjectAttrConfig);
     let mut input = parse_macro_input!(item as Item);
 
+    let serde = serde_path();
+
     // 组装需要的 derive 集合（struct/enum 通用）
     let mut required: Vec<syn::Path> = vec![
         syn::parse_quote!(Clone),
-        syn::parse_quote!(serde::Serialize),
-        syn::parse_quote!(serde::Deserialize),
+        syn::parse_quote!(#serde::Serialize),
+        syn::parse_quote!(#serde::Deserialize),
         syn::parse_quote!(PartialEq),
         syn::parse_quote!(Eq),
     ];
@@ -37,13 +39,15 @@ pub(crate) fn expand(attr: TokenStream, item: TokenStream) -> TokenStream {
         required.insert(0, syn::parse_quote!(Debug));
     }
 
+    let helpers = vec![serde_crate_attr()];
+
     match &mut input {
         Item::Struct(st) => {
-            apply_derives(&mut st.attrs, required);
+            apply_derives(&mut st.attrs, required, helpers);
             TokenStream::from(quote! { #st })
         }
         Item::Enum(en) => {
-            apply_derives(&mut en.attrs, required);
+            apply_derives(&mut en.attrs, required, helpers);
             TokenStream::from(quote! { #en })
         }
         other => syn::Error::new(other.span(), "#[value_object] only supports struct or enum")

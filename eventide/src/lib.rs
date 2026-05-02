@@ -74,11 +74,36 @@
 
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
+// Allow this crate to refer to itself as `::eventide` from inside its own
+// integration tests / examples / docs. The procedural macros in
+// `eventide-macros` route every generated path through `::eventide::domain`
+// when the user depends on this umbrella crate, so the alias is what makes
+// in-crate test usage of those macros resolve to the right place.
+extern crate self as eventide;
+
 /// Domain layer: aggregates, entities, value objects, events, repositories,
 /// and the optional asynchronous event engine.
 ///
 /// Re-export of the [`eventide_domain`] crate.
 pub use eventide_domain as domain;
+
+/// Re-export of the [`async_trait`] crate so users can write
+/// `#[async_trait]` on their own trait impls (e.g. [`domain::domain_service::DomainService`],
+/// [`domain::eventing::EventHandler`]) without adding a direct
+/// `async-trait` dependency.
+///
+/// The accompanying attribute-macro re-export lives in the macro namespace
+/// (see [`async_trait!`](macro@async_trait)) so `use eventide::async_trait;`
+/// followed by `#[async_trait]` works out of the box.
+pub use eventide_domain::async_trait;
+
+/// Re-export of the [`tokio`] runtime so users can write `#[tokio::main]`,
+/// `tokio::spawn`, etc. through `eventide::tokio` without depending on
+/// `tokio` directly. Available when the `eventing` feature is enabled
+/// (default).
+#[cfg(feature = "eventing")]
+#[cfg_attr(docsrs, doc(cfg(feature = "eventing")))]
+pub use eventide_domain::tokio;
 
 /// Application layer: command bus, query bus, handlers, application context.
 ///
