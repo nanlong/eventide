@@ -10,7 +10,9 @@ use syn::{
     spanned::Spanned,
 };
 
-use crate::utils::{apply_derives, ensure_required_fields};
+use crate::utils::{
+    apply_derives, ensure_required_fields, eventide_domain_path, serde_crate_attr, serde_path,
+};
 
 /// #[domain_event] 宏实现
 /// - 支持三种变体类型：命名字段 `Variant { .. }`、单元 `Variant`、元组 `Variant(T)`
@@ -37,16 +39,18 @@ pub(crate) fn expand(attr: TokenStream, item: TokenStream) -> TokenStream {
 
     let id_type = cfg.id_ty.unwrap_or_else(|| syn::parse_quote! { String });
     let version_lit = cfg.version.unwrap_or_else(|| syn::parse_quote! { 1 });
+    let domain = eventide_domain_path();
+    let serde = serde_path();
 
     // 合并/追加默认派生：Debug, Clone, PartialEq, Serialize, Deserialize
     let required: Vec<syn::Path> = vec![
         syn::parse_quote!(Debug),
         syn::parse_quote!(Clone),
         syn::parse_quote!(PartialEq),
-        syn::parse_quote!(serde::Serialize),
-        syn::parse_quote!(serde::Deserialize),
+        syn::parse_quote!(#serde::Serialize),
+        syn::parse_quote!(#serde::Deserialize),
     ];
-    apply_derives(&mut enum_item.attrs, required);
+    apply_derives(&mut enum_item.attrs, required, vec![serde_crate_attr()]);
 
     let mut variant_types: HashMap<String, syn::LitStr> = HashMap::new();
     let mut variant_versions: HashMap<String, syn::LitInt> = HashMap::new();
@@ -112,8 +116,7 @@ pub(crate) fn expand(attr: TokenStream, item: TokenStream) -> TokenStream {
         // 处理字段转换
         match &mut v.fields {
             syn::Fields::Named(fields_named) => {
-                let version_ty: Type =
-                    syn::parse_quote! { ::eventide_domain::value_object::Version };
+                let version_ty: Type = syn::parse_quote! { #domain::value_object::Version };
                 ensure_required_fields(
                     fields_named,
                     &[("id", &id_type), ("aggregate_version", &version_ty)],
@@ -123,12 +126,13 @@ pub(crate) fn expand(attr: TokenStream, item: TokenStream) -> TokenStream {
             }
             syn::Fields::Unit => {
                 // 单元变体转换为命名字段变体: Variant => Variant { id, aggregate_version }
-                v.fields = syn::Fields::Named(create_required_fields_only(&id_type));
+                v.fields = syn::Fields::Named(create_required_fields_only(&id_type, &domain));
             }
             syn::Fields::Unnamed(fields_unnamed) => {
                 // 元组变体转换为命名字段变体: Variant(T) => Variant { value: T, id,
                 // aggregate_version }
-                v.fields = syn::Fields::Named(convert_tuple_to_named(fields_unnamed, &id_type));
+                v.fields =
+                    syn::Fields::Named(convert_tuple_to_named(fields_unnamed, &id_type, &domain));
             }
         }
     }
@@ -172,11 +176,11 @@ pub(crate) fn expand(attr: TokenStream, item: TokenStream) -> TokenStream {
     let out = quote! {
         #enum_item
 
-        impl ::eventide_domain::domain_event::DomainEvent for #enum_ident {
+        impl #domain::domain_event::DomainEvent for #enum_ident {
             fn event_id(&self) -> &str { match self { #( #id_match_arms, )* } }
             fn event_type(&self) -> &str { match self { #( #type_match_arms, )* } }
             fn event_version(&self) -> usize { match self { #( #ver_match_arms, )* } }
-            fn aggregate_version(&self) -> ::eventide_domain::value_object::Version { match self { #( #agg_ver_match_arms, )* } }
+            fn aggregate_version(&self) -> #domain::value_object::Version { match self { #( #agg_ver_match_arms, )* } }
         }
     };
 
@@ -275,8 +279,11 @@ impl Parse for VariantEventAttrKv {
 }
 
 /// 创建只包含 id 和 aggregate_version 的命名字段集（用于单元变体转换）
-fn create_required_fields_only(id_type: &Type) -> syn::FieldsNamed {
-    let version_ty: Type = syn::parse_quote! { ::eventide_domain::value_object::Version };
+fn create_required_fields_only(
+    id_type: &Type,
+    domain: &proc_macro2::TokenStream,
+) -> syn::FieldsNamed {
+    let version_ty: Type = syn::parse_quote! { #domain::value_object::Version };
     syn::parse_quote! {
         {
             id: #id_type,
@@ -288,8 +295,12 @@ fn create_required_fields_only(id_type: &Type) -> syn::FieldsNamed {
 /// 将元组变体字段转换为命名字段，并添加必需字段
 /// - 单字段: `Variant(T)` => `Variant { value: T, id, aggregate_version }`
 /// - 多字段: `Variant(T, U)` => `Variant { value_0: T, value_1: U, id, aggregate_version }`
-fn convert_tuple_to_named(fields_unnamed: &syn::FieldsUnnamed, id_type: &Type) -> syn::FieldsNamed {
-    let version_ty: Type = syn::parse_quote! { ::eventide_domain::value_object::Version };
+fn convert_tuple_to_named(
+    fields_unnamed: &syn::FieldsUnnamed,
+    id_type: &Type,
+    domain: &proc_macro2::TokenStream,
+) -> syn::FieldsNamed {
+    let version_ty: Type = syn::parse_quote! { #domain::value_object::Version };
     let unnamed_fields = &fields_unnamed.unnamed;
 
     let named_fields: Vec<syn::Field> = if unnamed_fields.len() == 1 {

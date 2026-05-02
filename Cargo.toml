@@ -8,7 +8,7 @@ members = [
 resolver = "2"
 
 [workspace.package]
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 rust-version = "1.85"
 license = "MIT OR Apache-2.0"
@@ -22,9 +22,9 @@ categories = ["data-structures", "asynchronous", "rust-patterns"]
 
 [workspace.dependencies]
 # Local crates (path + version so they can be published independently)
-eventide-domain = { path = "eventide-domain", version = "0.1.0" }
-eventide-application = { path = "eventide-application", version = "0.1.0" }
-eventide-macros = { path = "eventide-macros", version = "0.1.0" }
+eventide-domain = { path = "eventide-domain", version = "0.1.1" }
+eventide-application = { path = "eventide-application", version = "0.1.1" }
+eventide-macros = { path = "eventide-macros", version = "0.1.1" }
 
 # Shared third-party deps pinned at the workspace level so versions stay consistent.
 anyhow = "1.0"
@@ -34,6 +34,7 @@ chrono = { version = "0.4", features = ["serde"] }
 dashmap = "6.1"
 futures-core = { version = "0.3", features = ["alloc"] }
 futures-util = "0.3"
+proc-macro-crate = "3"
 proc-macro2 = "1.0"
 quote = "1.0"
 serde = { version = "1.0", features = ["derive"] }

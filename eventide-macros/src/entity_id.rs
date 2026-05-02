@@ -7,7 +7,7 @@ use syn::{
     spanned::Spanned,
 };
 
-use crate::utils::apply_derives;
+use crate::utils::{apply_derives, serde_crate_attr, serde_path};
 
 /// Implementation of the `#[entity_id]` attribute macro.
 ///
@@ -67,13 +67,14 @@ pub(crate) fn expand(attr: TokenStream, item: TokenStream) -> TokenStream {
     // ownership semantics of the surrounding match arms simple — we
     // mutate `st_out.attrs` rather than the original input.
     let mut st_out = st.clone();
+    let serde = serde_path();
 
     let mut required: Vec<syn::Path> = vec![
         syn::parse_quote!(Default),
         syn::parse_quote!(Clone),
         syn::parse_quote!(Copy),
-        syn::parse_quote!(serde::Serialize),
-        syn::parse_quote!(serde::Deserialize),
+        syn::parse_quote!(#serde::Serialize),
+        syn::parse_quote!(#serde::Deserialize),
         syn::parse_quote!(PartialEq),
         syn::parse_quote!(Eq),
         syn::parse_quote!(Hash),
@@ -83,7 +84,7 @@ pub(crate) fn expand(attr: TokenStream, item: TokenStream) -> TokenStream {
         required.insert(0, syn::parse_quote!(Debug));
     }
 
-    apply_derives(&mut st_out.attrs, required);
+    apply_derives(&mut st_out.attrs, required, vec![serde_crate_attr()]);
 
     let ident = &st_out.ident;
     let generics = st_out.generics.clone();

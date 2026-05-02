@@ -23,10 +23,22 @@
 ```toml
 [dependencies]
 eventide = "0.1"
-serde = { version = "1", features = ["derive"] }
-tokio = { version = "1", features = ["full"] }
-async-trait = "0.1"
 ```
+
+> 一条依赖即可覆盖常用路径。Umbrella crate 在 `eventide` 之上再 re-export
+> 了所有运行时符号：
+>
+> - `serde`：宏生成的 `Serialize` / `Deserialize` 派生通过 `eventide` 内部的
+>   `serde` re-export 解析，所以使用 `#[entity]`、`#[entity_id]`、
+>   `#[domain_event]`、`#[value_object]` 无需直接依赖 `serde`。
+> - `eventide::tokio`：Tokio 运行时（如 `#[eventide::tokio::main]`、
+>   `eventide::tokio::spawn`）。在 `eventing` feature 启用时可用（默认开）。
+> - `eventide::async_trait`：在自己实现的 trait（如 `DomainService`、
+>   `EventHandler`）上直接写 `#[async_trait]`，无需直接依赖 `async-trait`。
+>
+> 仅当你在 re-export 之外另行使用 `serde`/`tokio`/`async-trait`
+> （如额外派生、自定义 `#[serde(...)]` 属性、运行时高级特性）时才需要在
+> 自己的 `Cargo.toml` 中显式声明。
 
 定义一个聚合：
 
