@@ -30,10 +30,15 @@ eventide-application  →  eventide-domain  ←  eventide-macros
 ```toml
 [dependencies]
 eventide = "0.1"
-serde = { version = "1", features = ["derive"] }
-tokio = { version = "1", features = ["full"] }
-async-trait = "0.1"
 ```
+
+> 一条依赖即可覆盖常用路径。宏生成的 `Serialize` / `Deserialize` 派生通过
+> `eventide` 内部的 `serde` re-export 解析，所以使用宏无需直接依赖 `serde`。
+> `eventide::tokio` 暴露 Tokio 运行时（随 `eventing` feature 启用，默认开），
+> `eventide::async_trait` 让你在自己实现的 trait 上直接写 `#[async_trait]`。
+> 仅当你在 re-export 之外另行使用 `serde`/`tokio`/`async-trait`
+> （如额外派生、自定义 `#[serde(...)]` 属性、运行时高级特性）时才需要在
+> 自己的 `Cargo.toml` 中显式声明。详见 [`eventide/README.zh.md`](eventide/README.zh.md)。
 
 最简聚合示例：
 

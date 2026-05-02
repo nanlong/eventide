@@ -21,6 +21,27 @@
 - `HandlerNotFound(name)` 使用类型名 `std::any::type_name::<T>()`，输出简洁
 - `TypeMismatch`（极少见）用于保护注册表被错误覆盖时的下转失败
 
+## 依赖
+
+```toml
+[dependencies]
+eventide-application = "0.1"
+async-trait = "0.1"
+tokio = { version = "1", features = ["full"] }
+```
+
+或通过 umbrella crate（推荐），它已 re-export `tokio` 与 `async_trait`，
+单依赖即可：
+
+```toml
+[dependencies]
+eventide = "0.1"
+```
+
+> 使用 umbrella crate 时，可改写为 `#[eventide::tokio::main]` 与
+> `use eventide::async_trait::async_trait;`，无需直接依赖
+> `tokio` / `async-trait`。
+
 ### 命令示例
 
 ```rust

@@ -28,7 +28,14 @@ rarely have to repeat the same list:
 
 `*` = can be turned off with `debug = false`.
 
-Make sure `serde` is in your dependency tree with the `derive` feature:
+The macro-generated `Serialize` / `Deserialize` derives resolve through
+`eventide_domain`'s internal `serde` re-export, so you do **not** need a
+direct `serde` dependency for the macros to compile — depending on
+`eventide` (or `eventide-domain`) is enough.
+
+Add `serde` to your own `Cargo.toml` only when you reach for it outside
+the macro-generated derives — e.g. extra `#[derive(Serialize)]` on
+hand-written types or custom `#[serde(...)]` attributes:
 
 ```toml
 [dependencies]

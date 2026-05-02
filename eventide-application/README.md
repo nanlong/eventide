@@ -31,12 +31,17 @@ async-trait = "0.1"
 tokio = { version = "1", features = ["full"] }
 ```
 
-Or via the umbrella crate:
+Or via the umbrella crate (recommended), which re-exports `tokio` and
+`async_trait` so a single dependency is enough:
 
 ```toml
 [dependencies]
 eventide = "0.1"
 ```
+
+> When using the umbrella crate, write `#[eventide::tokio::main]` and
+> `use eventide::async_trait::async_trait;` instead of depending on
+> `tokio` / `async-trait` directly.
 
 ## Command example
 

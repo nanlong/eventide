@@ -18,6 +18,18 @@
 
 说明：宏会与已有 `derive` 合并并去重（对 `Serialize`/`Deserialize` 统一为 `serde::...` 以避免重复）。
 
+> 宏生成的 `Serialize` / `Deserialize` 派生通过 `eventide_domain` 内部的
+> `serde` re-export 解析，**无需** 在目标 crate 直接依赖 `serde`，
+> 只依赖 `eventide`（或 `eventide-domain`）即可让宏正常编译。
+> 仅当你在宏生成派生之外另行使用 `serde`（如手写类型上加
+> `#[derive(Serialize)]`、自定义 `#[serde(...)]` 属性）时，才需要在
+> 自己的 `Cargo.toml` 中显式声明：
+>
+> ```toml
+> [dependencies]
+> serde = { version = "1", features = ["derive"] }
+> ```
+
 ## `#[entity]`
 
 作用于具名字段结构体：
@@ -25,7 +37,6 @@
 - 若缺失则追加字段：`id: IdType` 与 `version: usize`，并移到字段最前；
 - 实现 `::eventide_domain::entity::Entity`（`new/id/version`）。
 - 自动合成并合并 `#[derive(Debug, Default, serde::Serialize, serde::Deserialize)]`；用户可追加其它派生（宏会与现有 `derive` 合并并去重）。
-  - 需在目标 crate 的 `Cargo.toml` 中以 crate 名 `serde` 引入：`serde = { version = "1", features = ["derive"] }`
 
 语法：
 
@@ -46,7 +57,6 @@ struct Foo {
 
 - 自动合成并合并 `#[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]`；用户可追加其它派生（宏会与现有 `derive` 合并并去重）。
   - 可通过参数 `debug = false` 禁止自动派生 `Debug`，便于手写自定义 `Debug` 实现；
-  - 需在目标 crate 的 `Cargo.toml` 中以 crate 名 `serde` 引入：`serde = { version = "1", features = ["derive"] }`
 - 实现 `FromStr`（委托内部类型）与 `Display`；
 - 提供构造函数：`impl AccountId { pub fn new(value: Inner) -> Self }`
 - 追加便捷转换：
@@ -66,7 +76,6 @@ struct Foo {
 - 事件类型名默认为 `EnumName.Variant`，可在变体级覆盖；
 - 事件版本默认取枚举级 `version`，可在变体级覆盖。
 - 自动合成并合并 `#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]`；用户可追加其它派生（宏会与现有 `derive` 合并并去重）。
-  - 需在目标 crate 的 `Cargo.toml` 中以 crate 名 `serde` 引入：`serde = { version = "1", features = ["derive"] }`
 
 语法：
 

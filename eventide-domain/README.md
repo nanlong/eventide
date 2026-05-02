@@ -30,8 +30,17 @@ database driver, no message broker, and no HTTP framework.
 ```toml
 [dependencies]
 eventide-domain = "0.1"
-serde = { version = "1", features = ["derive"] }
 ```
+
+The macro-generated `Serialize` / `Deserialize` derives route through
+this crate's internal `serde` re-export, so `#[entity]`, `#[entity_id]`,
+`#[domain_event]` and `#[value_object]` work without a direct `serde`
+dependency. The crate also re-exports `eventide_domain::async_trait`
+(write `#[async_trait]` on your own trait impls) and
+`eventide_domain::tokio` (runtime, gated on the `eventing` feature).
+Add `serde` / `tokio` / `async-trait` to your own `Cargo.toml` only
+when you reach for them outside these re-exports (extra derives,
+custom `#[serde(...)]` attributes, advanced runtime features).
 
 Or pull everything in via the umbrella crate:
 

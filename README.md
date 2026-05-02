@@ -32,10 +32,18 @@ Most users only need to depend on the umbrella crate:
 ```toml
 [dependencies]
 eventide = "0.1"
-serde = { version = "1", features = ["derive"] }
-tokio = { version = "1", features = ["full"] }
-async-trait = "0.1"
 ```
+
+> A single dependency covers the common path. Macro-generated
+> `Serialize` / `Deserialize` derives route through `eventide`'s internal
+> `serde` re-export, so the macros work without a direct `serde`
+> dependency. `eventide::tokio` exposes the Tokio runtime (with the
+> `eventing` feature, default), and `eventide::async_trait` lets you
+> write `#[async_trait]` on your own trait impls. Add `serde` / `tokio` /
+> `async-trait` to your own `Cargo.toml` only when you reach for them
+> outside these re-exports (extra derives, custom `#[serde(...)]`
+> attributes, advanced runtime features). See
+> [`eventide/README.md`](eventide/README.md) for details.
 
 A minimal aggregate looks like this:
 
