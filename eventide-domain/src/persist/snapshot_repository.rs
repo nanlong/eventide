@@ -81,7 +81,7 @@ impl SnapshotPolicy {
             SnapshotPolicy::Never => false,
             SnapshotPolicy::Every(interval) => {
                 let interval = (*interval).max(1);
-                version > 0 && version % interval == 0
+                version > 0 && version.is_multiple_of(interval)
             }
         }
     }

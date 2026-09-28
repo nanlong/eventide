@@ -30,7 +30,7 @@ infra-sqlx = ["eventide-domain/infra-sqlx"]
 [dependencies]
 # Inlined (not using workspace = true) so we can set `default-features = false`
 # and let this crate's own `eventing` feature gate the asynchronous subsystem.
-eventide-domain = { path = "../eventide-domain", version = "0.1.1", default-features = false }
+eventide-domain = { path = "../eventide-domain", version = "0.1.2", default-features = false }
 eventide-application = { workspace = true, optional = true }
 eventide-macros = { workspace = true, optional = true }
 
